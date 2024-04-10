@@ -10,22 +10,24 @@ async function loadContacts() {
 
 const listContacts = async () => {
   const contacts = await loadContacts();
-  console.table(contacts);
+  return contacts;
 };
 
 const getContactById = async (contactId) => {
   const contacts = await loadContacts();
   const contact = contacts.find((contact) => contact.id === contactId);
-  console.log(contact);
+  return contact;
 };
 
 const removeContact = async (contactId) => {
-  const contacts = await loadContacts();
-  const filteredContacts = contacts.filter(
-    (contact) => contact.id !== contactId
-  );
-  await fs.writeFile(contactsPath, JSON.stringify(filteredContacts, null, 2));
-  console.log(`Contact with ID ${contactId} has been removed.`);
+  const contacts = await listContacts();
+  const index = contacts.findIndex((contact) => contact.id === contactId);
+  if (index !== -1) {
+    const [removed] = contacts.splice(index, 1);
+    await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+    return removed;
+  }
+  return null;
 };
 
 const addContact = async (body) => {
