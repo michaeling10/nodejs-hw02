@@ -2,17 +2,15 @@ const express = require("express");
 const logger = require("morgan");
 const cors = require("cors");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 const contactsRouter = require("./routes/api/contacts");
 
 mongoose
-  .connect(
-    "mongodb+srv://michael-admin:mike@cluster0.wlwvfvk.mongodb.net/db-contacts",
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Database connection successful");
   })
