@@ -1,25 +1,63 @@
-const express = require('express')
+const express = require("express");
 
-const router = express.Router()
+const {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+  updateStatusContact,
+} = require("../../models/contacts");
 
-router.get('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+const router = express.Router();
 
-router.get('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/", async (req, res, next) => {
+  const contacts = await listContacts();
+  res.json(contacts);
+});
 
-router.post('/', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.get("/:contactId", async (req, res, next) => {
+  try {
+    const contact = await getContactById(req.params.contactId);
+    if (contact) {
+      res.json(contact);
+    } else {
+      res.status(404).json({ message: "Not found" });
+    }
+  } catch (error) {
+    console.error("Error fetching contact:", error);
+    next(error);
+  }
+});
 
-router.delete('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.post("/", async (req, res, next) => {
+  const contact = await addContact(req.body);
+  res.status(201).json(contact);
+});
 
-router.put('/:contactId', async (req, res, next) => {
-  res.json({ message: 'template message' })
-})
+router.delete("/:contactId", async (req, res, next) => {
+  const contact = await removeContact(req.params.contactId);
+  if (contact) {
+    res.json({ message: "Contact deleted" });
+  } else {
+    res.status(404).json({ message: "Not found" });
+  }
+});
 
-module.exports = router
+router.put("/:contactId", async (req, res, next) => {
+  const contact = await updateContact(req.params.contactId, req.body);
+  res.json(contact || { message: "Not found" });
+});
+
+router.patch("/:contactId/favorite", async (req, res, next) => {
+  if (req.body.favorite === undefined) {
+    res.status(400).json({ message: "missing field favorite" });
+  } else {
+    const contact = await updateStatusContact(req.params.contactId, {
+      favorite: req.body.favorite,
+    });
+    res.json(contact || { message: "Not found" });
+  }
+});
+
+module.exports = router;
